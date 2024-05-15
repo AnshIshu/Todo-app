@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        /* Basic CSS for styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <form id="taskForm">
+            <input type="text" id="taskNameInput" placeholder="Task Name">
+            <textarea id="taskDescInput" placeholder="Task Description"></textarea>
+            <button type="button" onclick="addTask()">Add Task</button>
+        </form>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const taskList = document.getElementById('taskList');
+
+            // Function to fetch tasks from the backend
+            function getTasks() {
+                fetch('/Tasks')
+                    .then(response => response.json())
+                    .then(tasks => {
+                        taskList.innerHTML = '';
+                        tasks.forEach(task => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <strong>${task.taskName}</strong>: ${task.taskDesc}
+                                <button class="delete" onclick="deleteTask(${task.id})">Delete</button>
+                                <button class="edit" onclick="editTask(${task.id},'${task.taskName}','${task.taskDesc}')">Edit</button>
+                            `;
+                            taskList.appendChild(li);
+                        });
+                    });
+            }
+
+            // Function to add a new task
+            window.addTask = function () {
+                const taskNameInput = document.getElementById('taskNameInput');
+                const taskDescInput = document.getElementById('taskDescInput');
+                const taskName = taskNameInput.value.trim();
+                const taskDesc = taskDescInput.value.trim();
+                if (taskName !== '' && taskDesc !== '') {
+                    fetch('/Tasks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            taskName: taskName,
+                            taskDesc: taskDesc
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                        getTasks();
+                        taskNameInput.value = '';
+                        taskDescInput.value = '';
+                    });
+                }
+            };
+
+            // Function to delete a task
+            window.deleteTask = function (taskId) {
+                fetch(`/Tasks/${taskId}`, {
+                    method: 'DELETE'
+                })
+                .then(() => getTasks());
+            };
+
+            // Function to edit a task
+            window.editTask = function (taskId, taskName, taskDesc) {
+                const newName = prompt("Enter new task name", taskName);
+                const newDesc = prompt("Enter new task description", taskDesc);
+                if (newName !== null && newDesc !== null) {
+                    fetch(`/Tasks/${taskId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: taskId,
+                            taskName: newName,
+                            taskDesc: newDesc
+                        })
+                    })
+                    .then(() => getTasks());
+                }
+            };
+
+            // Initial fetch of tasks
+            getTasks();
+        });
+    </script>
+</body>
+</html>
