@@ -1,19 +1,30 @@
 package com.project.Todo.services;
 
+import com.project.Todo.entities.Task;
+import com.project.Todo.repositories.TaskRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.List;
 
-import com.project.Todo.controller.entites.Tasks;
+@Service
+public class TaskService {
 
-public interface TaskService {
-	
-	public List<Tasks> getTasks();
-	
-	public Tasks getTask(int taskId);
+    @Autowired
+    private TaskRepository taskRepository;
 
-	public Tasks addTask(Tasks task_var);
-	
-	public  Tasks updateTask(int id, Tasks updatedTask);
-	
-	public int delTask(int id);
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
 
+    public Task getTaskById(Long id) {
+        return taskRepository.findById(id).orElse(null);
+    }
+
+    public Task saveTask(Task task) {
+        return taskRepository.save(task);
+    }
+
+    public void deleteTask(Long id) {
+        taskRepository.deleteById(id);
+    }
 }

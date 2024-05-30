@@ -2,12 +2,14 @@ package com.project.Todo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
+@EntityScan(basePackages = "com.project.Todo.entities")
+@EnableJpaRepositories(basePackages = "com.project.Todo.repositories")
 public class ToDoAppApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ToDoAppApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ToDoAppApplication.class, args);
+    }
 }
